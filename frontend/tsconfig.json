@@ -1,0 +1,74 @@
+{
+  "compilerOptions": {
+    // ── OUTPUT TARGET ──────────────────────────────────────────────
+    // "ES2020" means TypeScript outputs modern JS that all 2020+ browsers understand.
+    // This gives us: optional chaining (?.), nullish coalescing (??), async/await, etc.
+    "target": "ES2020",
+
+    // ── MODULE SYSTEM ──────────────────────────────────────────────
+    // "ESNext" = use native ES Module syntax in the output (import/export).
+    // This is what browsers and Vite expect. Do NOT use "CommonJS" for frontend.
+    "module": "ESNext",
+
+    // "bundler" = TypeScript defers import resolution to the bundler (Vite).
+    // Vite knows how to handle aliases, bare imports, etc.
+    "moduleResolution": "bundler",
+
+    // ── JSX ────────────────────────────────────────────────────────
+    // "react-jsx" = use the NEW JSX transform (React 17+).
+    // Old way required: import React from 'react' in EVERY file.
+    // New way: TypeScript auto-imports only what's needed. No manual import.
+    "jsx": "react-jsx",
+
+    // ── STRICT MODE ────────────────────────────────────────────────
+    // This single flag enables 8+ strict checks. Most important:
+    //   strictNullChecks: "undefined is not a property of null" becomes a compile error
+    //   noImplicitAny: every variable must have an explicit or inferred type
+    //   strictFunctionTypes: function parameter types must match exactly
+    // Senior engineers NEVER disable this. It prevents entire bug categories.
+    "strict": true,
+
+    // ── LIBRARY TYPES ──────────────────────────────────────────────
+    // Tell TypeScript which browser APIs exist.
+    // "lib": ["ES2020"] → knows about Promise, Array.flat(), Object.fromEntries()
+    // "DOM"            → knows about document, window, fetch, HTMLElement
+    // "DOM.Iterable"   → knows about for...of on NodeList, HTMLCollection
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    // ── PATH ALIASES ───────────────────────────────────────────────
+    // Allows: import Button from '@/components/Button'
+    // Instead of: import Button from '../../../components/Button'
+    // "baseUrl" sets the root for relative paths.
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // ── OUTPUT ─────────────────────────────────────────────────────
+    // "noEmit": true = TypeScript will TYPE-CHECK but NOT write any .js files.
+    // Vite handles the actual compilation. TypeScript is only a type-checker here.
+    "noEmit": true,
+
+    // ── INTEROP ────────────────────────────────────────────────────
+    // Allows: import React from 'react'  (default import from CommonJS module)
+    // Without this, you'd need: import * as React from 'react'
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    // ── EXTRA STRICTNESS ───────────────────────────────────────────
+    // Skip type-checking .d.ts files in node_modules (speeds up compilation a lot)
+    "skipLibCheck": true,
+
+    // Enforce consistent file casing. Prevents bugs on case-sensitive Linux servers
+    // when developing on case-insensitive macOS/Windows.
+    "forceConsistentCasingInFileNames": true,
+
+    // Allow importing JSON files: import data from './data.json'
+    "resolveJsonModule": true
+  },
+
+  // Tell TypeScript WHICH FILES to include in the project.
+  // "src/**/*" = everything inside src/
+  // "vite.config.ts" = the Vite config file itself
+  "include": ["src/**/*", "vite.config.ts"]
+}

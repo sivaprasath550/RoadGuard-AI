@@ -1,0 +1,53 @@
+{
+  // "parser" tells ESLint how to read TypeScript syntax.
+  // Without this, ESLint sees TypeScript and crashes ("unexpected token :").
+  "parser": "@typescript-eslint/parser",
+
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": { "jsx": true }
+  },
+
+  "plugins": [
+    "@typescript-eslint",
+    "react-hooks",
+    "react-refresh"
+  ],
+
+  "extends": [
+    // Base ESLint recommended rules (no-unused-vars, no-undef, etc.)
+    "eslint:recommended",
+
+    // TypeScript-specific rules (prefer const assertions, explicit return types, etc.)
+    "plugin:@typescript-eslint/recommended"
+  ],
+
+  "rules": {
+    // ── React Rules ─────────────────────────────────────────────
+    // Enforce Rules of Hooks: hooks can only be called at top level of a function component
+    "react-hooks/rules-of-hooks": "error",
+
+    // Warn when useEffect/useMemo/useCallback are missing dependencies
+    "react-hooks/exhaustive-deps": "warn",
+
+    // Warn if you export a component in a way that breaks Fast Refresh
+    "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
+
+    // ── TypeScript Rules ────────────────────────────────────────
+    // Warn on 'any' type — you should always use specific types
+    "@typescript-eslint/no-explicit-any": "warn",
+
+    // Error on variables declared but never used (catches dead code)
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+
+    // ── General ─────────────────────────────────────────────────
+    // Prevent console.log in production code (use a proper logger)
+    "no-console": ["warn", { "allow": ["error", "warn"] }]
+  },
+
+  "env": {
+    "browser": true,   // Knows about window, document, fetch
+    "es2020": true     // Knows about Promise, Optional chaining, etc.
+  }
+}

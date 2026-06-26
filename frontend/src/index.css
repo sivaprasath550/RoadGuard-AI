@@ -1,0 +1,73 @@
+/*
+  Tailwind CSS works through THREE directives:
+
+  @tailwind base      → Injects Preflight (a CSS reset that normalizes browser defaults)
+                        Example: removes default margins, sets box-sizing: border-box
+  @tailwind components → Injects any component classes (defined with @layer components)
+  @tailwind utilities  → Injects all the utility classes you used (bg-blue-500, p-4, etc.)
+
+  PostCSS + the Tailwind plugin transforms these @tailwind directives
+  into real CSS at build time.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global Base Styles ──────────────────────────────────────────── */
+@layer base {
+  /* Set the document background to our darkest color.
+     'html' and 'body' must both be set to prevent white flash on load. */
+  html, body {
+    @apply bg-road-dark text-road-text;
+    font-family: 'Inter', system-ui, sans-serif;
+
+    /* Prevent horizontal scrollbar on mobile */
+    overflow-x: hidden;
+
+    /* Smooth scrolling for anchor links */
+    scroll-behavior: smooth;
+  }
+
+  /* Remove default outline and add our custom focus ring.
+     This matters for accessibility — keyboard users need visible focus. */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-road-accent ring-offset-2 ring-offset-road-dark;
+  }
+
+  /* Better font rendering on macOS */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ── Leaflet Map Overrides ────────────────────────────────────────── */
+@layer components {
+  /* The Leaflet map container MUST have an explicit height.
+     Without this, the map renders as 0px tall and appears invisible.
+     This is the #1 most common Leaflet bug. */
+  .leaflet-container {
+    @apply w-full h-full bg-road-darker;
+  }
+
+  /* Override Leaflet's default white popup background for dark theme */
+  .leaflet-popup-content-wrapper {
+    @apply bg-road-surface text-road-text border border-road-border rounded-xl shadow-2xl;
+  }
+
+  .leaflet-popup-tip {
+    @apply bg-road-surface;
+  }
+}
+
+/* ── Custom Scrollbar ─────────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

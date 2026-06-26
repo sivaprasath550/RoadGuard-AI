@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    // ── OUTPUT ─────────────────────────────────────────────────────
+    // Node.js 20+ supports ES2022 natively.
+    // We target ES2020 for maximum compatibility with older Node versions.
+    "target": "ES2020",
+
+    // "CommonJS" for backend. Node.js uses require() by default.
+    // This compiles your TypeScript `import` statements to `require()` calls.
+    // Different from frontend which uses "ESNext" for native browser modules.
+    "module": "CommonJS",
+
+    // How TypeScript resolves module paths.
+    // "node" = follows Node.js resolution algorithm:
+    //   1. Check node_modules
+    //   2. Check relative paths
+    //   3. Check baseUrl + paths
+    "moduleResolution": "node",
+
+    // Where compiled .js files go when you run `tsc`
+    "outDir": "./dist",
+
+    // Where your TypeScript source files are
+    "rootDir": "./src",
+
+    // ── STRICT ─────────────────────────────────────────────────────
+    "strict": true,
+
+    // ── DECORATORS ─────────────────────────────────────────────────
+    // Required for libraries that use decorators (@Controller, @Get, etc.)
+    // We're not using NestJS, but Mongoose's @Schema decorator needs this.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // ── INTEROP ────────────────────────────────────────────────────
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // ── PATH ALIASES ───────────────────────────────────────────────
+    // Allows: import { UserService } from '@/services/UserService'
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    // ── SOURCE MAPS ────────────────────────────────────────────────
+    // Source maps let Node.js error stack traces point to .ts files,
+    // not compiled .js files. Makes debugging much easier.
+    "sourceMap": true
+  },
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,15 @@
+# Normalize line endings for all text files to LF on commit.
+# This ensures consistent line endings across Windows/Mac/Linux developers.
+# Without this, Windows devs commit CRLF, Mac/Linux devs commit LF,
+# and every file shows as "changed" when switching between machines.
+
+* text=auto eol=lf
+
+# Explicitly binary — don't touch line endings
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary

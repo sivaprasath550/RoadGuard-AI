@@ -1,0 +1,37 @@
+# ─── Node ───────────────────────────────────────────────
+# Never commit node_modules — npm install recreates it from package.json
+node_modules/
+
+# TypeScript compiled output — generated, not source
+dist/
+build/
+
+# ─── Environment Variables ───────────────────────────────
+# .env files contain secrets (DB passwords, API keys, JWT secrets)
+# NEVER commit these. Anyone with your .env owns your app.
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# ─── Logs ───────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── OS / Editor ────────────────────────────────────────
+.DS_Store          # macOS folder metadata
+Thumbs.db          # Windows thumbnail cache
+.vscode/           # Editor-specific settings (subjective — some teams commit this)
+
+# ─── Vite ───────────────────────────────────────────────
+# Vite's local build cache — regenerated automatically
+frontend/.vite/
+
+# ─── Python (AI Service) ────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+ai-service/venv/
+ai-service/.venv/

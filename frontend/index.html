@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- Controls how the page scales on mobile devices.
+         width=device-width: use the actual device screen width (not 980px default)
+         initial-scale=1.0: don't zoom in or out on load
+         This is REQUIRED for responsive Tailwind layouts to work correctly. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts: Inter (UI) + JetBrains Mono (code/coordinates) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet CSS: Required for the map to render correctly.
+         Without this, map tiles appear but controls and popups break. -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <title>RoadGuard AI — Community Road Safety</title>
+    <meta name="description" content="Real-time road hazard detection and community alerts powered by AI" />
+  </head>
+  <body>
+    <!-- This single div is where React mounts the ENTIRE application.
+         React takes over this element and renders everything inside it.
+         Once React mounts, this div's children are entirely managed by React.
+
+         The browser initially serves an empty div — this is called a "shell".
+         JavaScript then runs and fills it with your components.
+         This is called Client-Side Rendering (CSR). -->
+    <div id="root"></div>
+
+    <!-- type="module" tells the browser to treat this as an ES Module.
+         This enables: top-level await, import statements, strict mode by default.
+         Vite replaces this with the actual bundled output during `vite build`. -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
