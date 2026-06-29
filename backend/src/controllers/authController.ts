@@ -12,6 +12,7 @@
 
 import { Request, Response, NextFunction } from 'express'
 import { authService } from '../services/authService'
+import User from '../models/User'
 
 // ── Cookie Configuration ──────────────────────────────────────────────
 // Centralizing cookie options prevents drift — one place to update settings.
@@ -141,9 +142,7 @@ export const authController = {
     // It contains: { userId, email, role }
     const userId = req.user!.userId
 
-    const user = await import('../models/User').then(m =>
-      m.default.findById(userId).lean()
-    )
+    const user = await User.findById(userId).lean()
 
     if (!user) {
       return res.status(404).json({

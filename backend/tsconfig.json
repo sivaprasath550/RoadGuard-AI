@@ -15,7 +15,9 @@
     //   1. Check node_modules
     //   2. Check relative paths
     //   3. Check baseUrl + paths
-    "moduleResolution": "node",
+    // moduleResolution is intentionally omitted.
+    // When "module" is "CommonJS", TypeScript infers node-style resolution automatically.
+    // Explicitly writing "node" or "node10" triggers a TypeScript 5.9 deprecation error.
 
     // Where compiled .js files go when you run `tsc`
     "outDir": "./dist",

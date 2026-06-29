@@ -1,55 +1,43 @@
-// redis.ts handles connecting to Redis via ioredis.
-//
-// WHY REDIS?
-// MongoDB stores data on DISK. Every query reads from disk.
-// Disk speed: ~100MB/s (SSD), latency: ~0.1ms
-//
-// Redis stores data in RAM. Every read/write is in-memory.
-// RAM speed: ~50GB/s, latency: ~0.001ms (100x faster than SSD)
-//
-// USE CASES IN ROADGUARD AI:
-//   1. Cache nearby hazards by geohash → avoid DB query on every GPS ping
-//   2. Rate limiting counters (faster than hitting MongoDB)
-//   3. Session storage (optional, if we move away from cookies)
-//   4. Pub/Sub for Socket.io in multi-instance deployments
-//
-// WHAT IS IOREDIS?
-// The official 'redis' npm package is fine, but ioredis has:
-//   - Built-in reconnection with exponential backoff
-//   - Pipeline support (batch multiple commands)
-//   - Cluster support
-//   - Better TypeScript types
-//   - Used by Vercel, Shopify, and others in production
-
 import Redis from 'ioredis'
 
-// Export the client so other modules can use it directly.
-// We use 'let' because we assign it in connectRedis().
 export let redisClient: Redis
 
 export async function connectRedis(): Promise<void> {
   const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+  const isDev = process.env.NODE_ENV !== 'production'
 
   redisClient = new Redis(REDIS_URL, {
-    // ioredis retries failed connections automatically.
-    // maxRetriesPerRequest: null = retry infinitely (for long-running apps)
     maxRetriesPerRequest: null,
 
-    // Reconnect strategy: exponential backoff capped at 30 seconds.
-    // If Redis goes down, we don't hammer it every 1ms.
     retryStrategy(times) {
-      const delay = Math.min(times * 100, 30000)
-      console.log(`Redis retry in ${delay}ms (attempt ${times})`)
-      return delay
+      if (isDev && times > 2) return null  // Stop after 2 retries in dev
+      return Math.min(times * 500, 30000)
     },
+
+    enableOfflineQueue: false,
   })
 
-  // ioredis connects lazily — we ping to verify the connection is actually alive.
-  await redisClient.ping()
+  // Register error handler BEFORE ping so ioredis never fires an
+  // "Unhandled error event" — ioredis requires at least one listener.
+  redisClient.on('error', () => {})
+
+  // 5-second hard timeout so ping() never hangs indefinitely.
+  await Promise.race([
+    redisClient.ping(),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Redis connection timed out after 5s')), 5000)
+    ),
+  ])
+
   console.log('✓ Redis connected.')
 
-  redisClient.on('error', (err) => {
-    console.error('✗ Redis error:', err.message)
+  redisClient.on('error', (err: Error) => {
+    // Only log, don't crash — the server continues without Redis in dev.
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('⚠ Redis error (non-fatal in dev):', err.message)
+    } else {
+      console.error('✗ Redis error:', err.message)
+    }
   })
 
   redisClient.on('reconnecting', () => {

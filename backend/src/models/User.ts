@@ -110,9 +110,13 @@ const UserSchema = new Schema<IUser>(
     // toJSON transform: controls what happens when you call res.json(user)
     // We use it to remove sensitive/internal fields from API responses.
     toJSON: {
-      transform(_doc, ret) {
-        delete ret.password    // Never send password hash in responses
-        delete ret.__v         // Remove Mongoose's internal version key
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transform(_doc: any, ret: any) {
+        // Mongoose's transform receives a raw POJO — 'any' is accurate here.
+        // TypeScript 5.9 requires deleted keys to be optional in the static type,
+        // but Mongoose's transform type is too generic to express that statically.
+        delete ret.password   // Never send password hash in responses
+        delete ret.__v        // Remove Mongoose's internal version key
         return ret
       },
     },

@@ -28,8 +28,16 @@ async function bootstrap() {
     // If the server starts before DB connects, the first API call will fail.
     await connectDatabase()
 
-    // Step 2: Connect to Redis
-    await connectRedis()
+    // Step 2: Connect to Redis (optional in development)
+    // In production Redis is required (caching + Socket.io pub/sub).
+    // In development, if Redis isn't running locally the server still starts —
+    // features that need Redis will log a warning but won't crash.
+    try {
+      await connectRedis()
+    } catch (err) {
+      if (process.env.NODE_ENV === 'production') throw err
+      console.warn('⚠ Redis unavailable — continuing without cache (dev mode)')
+    }
 
     // Step 3: Create HTTP server from Express app.
     // WHY use http.createServer(app) instead of app.listen()?
