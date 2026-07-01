@@ -15,38 +15,39 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import MapSidebar from '../components/map/MapSidebar'
 import MapView from '../components/map/MapView'
+import HazardReportModal from '../components/hazard/HazardReportModal'
+import { useGeolocation } from '../hooks/useGeolocation'
 
 export default function MapPage() {
-  // reportModalOpen will control the hazard report modal in Phase 4.
-  // We wire up the button now so MapControls has a real handler.
   const [reportModalOpen, setReportModalOpen] = useState(false)
 
+  // useGeolocation here (in addition to MapView) so the modal knows
+  // the user's current coordinates when they open the report form.
+  // The hook uses watchPosition internally — calling it twice is safe
+  // because the browser deduplicates GPS watches.
+  const { position } = useGeolocation()
+
   return (
-    // h-screen: fills the full viewport height (100vh)
-    // overflow-hidden: prevents any child from causing a scrollbar
-    // bg-road-dark: fallback background while map tiles are loading
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="flex h-screen w-screen overflow-hidden bg-road-dark"
     >
-      {/* Left navigation sidebar — fixed 80px wide */}
       <MapSidebar />
 
-      {/* Map fills all remaining horizontal space.
-          relative: so absolutely-positioned overlays (controls, badges)
-          are positioned relative to this container, not the viewport. */}
       <div className="relative flex-1 h-full">
         <MapView onReportClick={() => setReportModalOpen(true)} />
       </div>
 
-      {/* Phase 4 will add:
-          <HazardReportModal
-            isOpen={reportModalOpen}
-            onClose={() => setReportModalOpen(false)}
-          />
-      */}
+      {/* Hazard report modal — rendered outside MapView so it sits
+          above the map in the z-index stack without Leaflet interference */}
+      <HazardReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        latitude={position?.lat  ?? 0}
+        longitude={position?.lng ?? 0}
+      />
     </motion.div>
   )
 }

@@ -20,7 +20,7 @@ import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit'
 import authRouter from './routes/authRouter'
-// import hazardRouter from './routes/hazardRouter'  ← Phase 4
+import hazardRouter from './routes/hazardRoutes'
 
 const app = express()
 
@@ -122,8 +122,8 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // ── ROUTES ───────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter)
-// app.use('/api/hazards', hazardRouter)  ← Phase 4
-// app.use('/api/users',   userRouter)    ← Phase 4
+app.use('/api/hazards', hazardRouter)
+// app.use('/api/users',   userRouter)    ← Phase 5
 // app.use('/api/alerts',  alertRouter)   ← Phase 5
 
 // ── GLOBAL ERROR HANDLER ─────────────────────────────────────────────

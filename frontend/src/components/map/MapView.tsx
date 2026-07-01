@@ -16,7 +16,7 @@
 // rendered as children of <MapContainer>. This is because MapContainer
 // provides the map instance via React Context.
 
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import { Map as LeafletMap } from 'leaflet'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -25,6 +25,7 @@ import { MapPin, WifiOff } from 'lucide-react'
 import { useGeolocation } from '../../hooks/useGeolocation'
 import UserLocationMarker from './UserLocationMarker'
 import MapControls from './MapControls'
+import HazardLayer from './HazardLayer'
 
 // ── CartoDB Dark Matter Tile Layer ────────────────────────────────────
 // This gives us the premium dark map look (Google Maps dark mode equivalent).
@@ -134,7 +135,10 @@ export default function MapView({ onReportClick }: Props) {
           </>
         )}
 
-        {/* Phase 4 will add: <HazardMarkers /> here */}
+        {/* Hazard pins — only render when we have a position */}
+        {position && (
+          <HazardLayer latitude={position.lat} longitude={position.lng} />
+        )}
       </MapContainer>
 
       {/* ── Overlays (positioned OVER the map) ─────────────────────── */}

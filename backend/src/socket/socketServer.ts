@@ -25,6 +25,15 @@ import { Server as SocketIOServer } from 'socket.io'
 
 export let io: SocketIOServer
 
+// getIO() is a safe accessor used by controllers to broadcast events.
+// Controllers can't import `io` directly at module load time because
+// `io` is assigned inside initializeSocket(), which runs after the app boots.
+// Using a getter avoids the "io used before assignment" timing issue.
+export function getIO(): SocketIOServer {
+  if (!io) throw new Error('Socket.io not initialized — call initializeSocket() first')
+  return io
+}
+
 export function initializeSocket(httpServer: HttpServer): SocketIOServer {
   io = new SocketIOServer(httpServer, {
     cors: {

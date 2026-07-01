@@ -13,6 +13,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { authService } from '../services/authService'
 import User from '../models/User'
+import { asyncHandler } from '../utils/asyncHandler'
 
 // ── Cookie Configuration ──────────────────────────────────────────────
 // Centralizing cookie options prevents drift — one place to update settings.
@@ -176,12 +177,3 @@ export const authController = {
 //
 // This is so common in Express that many apps use the 'express-async-handler'
 // npm package for exactly this. We build our own to understand the pattern.
-function asyncHandler(
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
-) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    // fn() returns a Promise. If it rejects, .catch(next) is called.
-    // next(error) triggers Express's error handling middleware chain.
-    Promise.resolve(fn(req, res, next)).catch(next)
-  }
-}
