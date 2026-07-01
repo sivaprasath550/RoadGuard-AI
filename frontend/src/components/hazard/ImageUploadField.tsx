@@ -4,7 +4,6 @@ import { Camera, X } from 'lucide-react'
 interface ImageUploadFieldProps {
   onFileSelect: (file: File) => void
   onClear:      () => void
-  file:         File | null
 }
 
 // ImageUploadField handles:
@@ -18,7 +17,7 @@ interface ImageUploadFieldProps {
 // This gives instant preview before the upload happens.
 // The URL is valid only for the lifetime of the current page —
 // we must call URL.revokeObjectURL() when done to release memory.
-export default function ImageUploadField({ onFileSelect, onClear, file }: ImageUploadFieldProps) {
+export default function ImageUploadField({ onFileSelect, onClear }: ImageUploadFieldProps) {
   const inputRef             = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
 
@@ -62,15 +61,15 @@ export default function ImageUploadField({ onFileSelect, onClear, file }: ImageU
           <img
             src={preview}
             alt="Hazard preview"
-            className="w-full h-40 object-cover rounded-lg"
+            className="w-full h-24 object-cover rounded-lg"
           />
           <button
             type="button"
             onClick={handleClear}
-            className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
+            className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
             aria-label="Remove photo"
           >
-            <X size={14} />
+            <X size={12} />
           </button>
         </div>
       ) : (
@@ -78,14 +77,16 @@ export default function ImageUploadField({ onFileSelect, onClear, file }: ImageU
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-full h-32 border-2 border-dashed border-gray-600 rounded-lg
-                     flex flex-col items-center justify-center gap-2
+          className="w-full h-20 border-2 border-dashed border-gray-600 rounded-lg
+                     flex items-center justify-center gap-3
                      text-gray-400 hover:border-road-accent hover:text-road-accent
                      transition-colors cursor-pointer"
         >
-          <Camera size={24} />
-          <span className="text-sm">Tap to add photo</span>
-          <span className="text-xs text-gray-500">JPEG, PNG, WebP · max 5MB</span>
+          <Camera size={18} />
+          <div className="text-left">
+            <div className="text-xs font-medium">Tap to add photo</div>
+            <div className="text-[10px] text-gray-500">JPEG, PNG, WebP · max 5MB</div>
+          </div>
         </button>
       )}
     </div>

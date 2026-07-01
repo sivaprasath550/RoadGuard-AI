@@ -35,10 +35,13 @@ export async function createHazard(input: CreateHazardInput): Promise<Hazard> {
   formData.append('longitude',   String(input.longitude))
   formData.append('image',       input.image)   // File object → binary part
 
+  // CRITICAL: delete Content-Type so Axios can set multipart/form-data WITH the
+  // boundary string automatically. The api instance defaults to application/json —
+  // if that header is present, Multer on the backend cannot parse the file parts.
   const res = await api.post<ApiResponse<{ hazard: Hazard }>>(
     '/hazards',
-    formData
-    // No Content-Type header — Axios sets it automatically for FormData
+    formData,
+    { headers: { 'Content-Type': undefined } }
   )
   return res.data.data!.hazard
 }
