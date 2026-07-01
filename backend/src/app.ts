@@ -131,15 +131,24 @@ app.use('/api/hazards', hazardRouter)
 // Any call to next(error) anywhere in the app ends up here.
 // This is the LAST middleware — must be registered after all routes.
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[Error]', err.stack || err.message)
-
   const statusCode = err.statusCode || err.status || 500
-  const message = err.message || 'Internal Server Error'
+
+  // Always log the real error server-side (ops/debugging)
+  console.error(`[Error ${statusCode}]`, err.message)
+
+  // Security rule: only send the error message to the client when it is
+  // a 4xx error WE explicitly threw (validation, auth, not-found).
+  // For 5xx errors (unexpected crashes, third-party failures), always send
+  // a generic message — never leak stack traces or internal service details.
+  const isClientError = statusCode >= 400 && statusCode < 500
+  const clientMessage = isClientError
+    ? err.message
+    : 'Something went wrong. Please try again later.'
 
   res.status(statusCode).json({
-    error: message,
-    // Only send stack trace in development — never expose in production
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    error: clientMessage,
+    // Stack trace only in development AND only for client errors (debugging aid)
+    ...(process.env.NODE_ENV === 'development' && { debug: err.message }),
   })
 })
 

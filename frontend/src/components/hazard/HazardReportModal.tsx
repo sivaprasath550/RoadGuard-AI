@@ -74,10 +74,16 @@ export default function HazardReportModal({
       })
       handleClose()
     } catch (err: any) {
+      const status = err?.response?.status ?? 0
+
+      // 4xx = something the user can fix (validation, duplicate, etc.) — show it
+      // 5xx or network = our problem, not the user's — show a generic message
+      // Never forward raw server internals (Cloudinary errors, DB messages, etc.)
+      const isUserError = status >= 400 && status < 500
       setError(
-        err?.response?.data?.error ||
-        err?.message ||
-        'Failed to submit report. Please try again.'
+        isUserError
+          ? (err?.response?.data?.error ?? err?.message ?? 'Request failed.')
+          : 'Something went wrong on our end. Please try again.'
       )
     }
   }
