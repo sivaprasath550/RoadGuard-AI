@@ -6,6 +6,7 @@ import { useCurrentUser } from '../hooks/useAuth'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 const MapPage      = lazy(() => import('@/pages/MapPage'))
+const AlertsPage   = lazy(() => import('@/pages/AlertsPage'))
 const LoginPage    = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const ProfilePage  = lazy(() => import('@/pages/ProfilePage'))
@@ -43,6 +44,7 @@ export default function AppRoutes() {
         {/* Protected routes — ProtectedRoute checks auth before rendering Outlet */}
         <Route element={<ProtectedRoute />}>
           <Route path="/map"     element={<MapPage />} />
+          <Route path="/alerts"  element={<AlertsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
