@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import ngeohash from 'ngeohash'
 import { hazardService } from '../services/hazardService'
 import { asyncHandler } from '../utils/asyncHandler'
 import { getIO } from '../socket/socketServer'
@@ -32,15 +33,19 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     req.user!.userId
   )
 
-  // Broadcast to every connected Socket.io client.
-  // They receive this event in their useSocket() hook and add the pin to the map.
-  // We use getIO() (a getter for the socket server instance) because we can't
-  // import `io` directly — it's created after the express app in index.ts.
+  // Compute the geohash room for the hazard's location (precision 4 ≈ city-sized cell).
+  // Only sockets that joined this room (users near this area) receive the event.
+  // req.body values are strings from FormData — parseFloat converts them.
+  const room = ngeohash.encode(
+    parseFloat(req.body.latitude),
+    parseFloat(req.body.longitude),
+    4
+  )
+
   try {
-    const io = getIO()
-    io.emit('hazard:new', hazard)
+    getIO().to(room).emit('hazard:new', hazard)
   } catch {
-    // Socket.io not initialized (possible in tests). Non-fatal — log and continue.
+    // Socket.io not initialized (possible in tests). Non-fatal.
     console.warn('Socket.io not available for hazard:new broadcast')
   }
 
@@ -78,9 +83,9 @@ export const verify = asyncHandler(async (req: Request, res: Response) => {
     return res.status(404).json({ success: false, error: 'Hazard not found.' })
   }
 
-  // Broadcast verification count update to all clients.
   try {
-    getIO().emit('hazard:verified', {
+    const room = ngeohash.encode(hazard.location.coordinates[1], hazard.location.coordinates[0], 4)
+    getIO().to(room).emit('hazard:verified', {
       hazardId:      hazard._id,
       verifiedCount: hazard.verifiedBy.length,
     })
@@ -105,7 +110,8 @@ export const resolve = asyncHandler(async (req: Request, res: Response) => {
   }
 
   try {
-    getIO().emit('hazard:resolved', { hazardId: hazard._id })
+    const room = ngeohash.encode(hazard.location.coordinates[1], hazard.location.coordinates[0], 4)
+    getIO().to(room).emit('hazard:resolved', { hazardId: hazard._id })
   } catch {
     // non-fatal
   }

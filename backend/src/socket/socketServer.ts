@@ -50,16 +50,29 @@ export function initializeSocket(httpServer: HttpServer): SocketIOServer {
   })
 
   io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`)
+    console.log(`[Socket] connected: ${socket.id}`)
 
-    socket.on('disconnect', (reason) => {
-      console.log(`Socket disconnected: ${socket.id} (${reason})`)
+    // Client sends their geohash room (e.g. "tdn2") once GPS is available.
+    // 'connect' event on the client re-emits this after every reconnection,
+    // so room membership survives dropped connections automatically.
+    socket.on('join:room', (room: string) => {
+      // Leave any previous geographic room before joining the new one.
+      // This handles GPS position changes without accumulating stale rooms.
+      socket.rooms.forEach(r => {
+        if (r !== socket.id) socket.leave(r)
+      })
+      socket.join(room)
+      console.log(`[Socket] ${socket.id} → room "${room}"`)
     })
 
-    // Phase 5 will add:
-    // socket.on('join:area', ...)   → user subscribes to geographic area
-    // socket.on('leave:area', ...)  → user unsubscribes
-    // io.to(areaRoom).emit('new:hazard', hazardData)  → broadcast to area
+    socket.on('leave:room', (room: string) => {
+      socket.leave(room)
+      console.log(`[Socket] ${socket.id} ← left room "${room}"`)
+    })
+
+    socket.on('disconnect', (reason) => {
+      console.log(`[Socket] disconnected: ${socket.id} (${reason})`)
+    })
   })
 
   console.log('✓ Socket.io initialized.')

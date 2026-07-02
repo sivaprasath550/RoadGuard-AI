@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { io } from 'socket.io-client'
+import ngeohash from 'ngeohash'
 import { getNearbyHazards, createHazard, verifyHazard } from '../services/hazardApi'
 import type { Hazard, CreateHazardInput } from '../types'
 
@@ -76,13 +77,21 @@ export function useHazardSocket(
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    // Connect to the backend Socket.io server.
-    // Vite proxies /socket.io → http://localhost:5000 (configured in vite.config.ts).
+    // Don't connect until we have a real GPS fix.
+    // geohash(0, 0, 4) produces a valid but wrong room.
+    if (latitude === 0 || longitude === 0) return
+
+    // Precision 4 ≈ city-sized cell (~39km × 20km).
+    // Must match the precision used in hazardController.ts on the server.
+    const room   = ngeohash.encode(latitude, longitude, 4)
     const socket = io({ withCredentials: true })
 
+    // 'connect' fires on initial connection AND after every reconnection.
+    // Re-joining the room here means dropped connections self-heal —
+    // the client doesn't need any extra reconnect logic.
+    socket.on('connect', () => socket.emit('join:room', room))
+
     socket.on('hazard:new', (hazard: Hazard) => {
-      // Add the new hazard to the existing cache without a network request.
-      // This is React Query's "optimistic cache update" pattern.
       queryClient.setQueryData<Hazard[]>(
         hazardKeys.nearby(latitude, longitude),
         (old = []) => [hazard, ...old]
@@ -91,17 +100,14 @@ export function useHazardSocket(
     })
 
     socket.on('hazard:resolved', ({ hazardId }: { hazardId: string }) => {
-      // Remove the resolved hazard from the cache immediately.
       queryClient.setQueryData<Hazard[]>(
         hazardKeys.nearby(latitude, longitude),
         (old = []) => old.filter(h => h._id !== hazardId)
       )
     })
 
-    // Cleanup: disconnect socket when the component unmounts.
-    // Without this, unmounting/remounting MapView would create multiple
-    // socket connections — a memory leak.
     return () => {
+      socket.emit('leave:room', room)
       socket.disconnect()
     }
   }, [latitude, longitude, queryClient, onNewHazard])
