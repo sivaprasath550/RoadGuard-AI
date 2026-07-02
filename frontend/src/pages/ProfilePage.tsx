@@ -125,7 +125,7 @@ function SkeletonRow() {
 // ── ProfilePage ────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const { user } = useAuthStore()
-  const { data: myHazards = [], isLoading } = useMyHazards()
+  const { data: myHazards = [], isLoading, isError } = useMyHazards()
 
   // Derive stats from the fetched list — no separate endpoint needed
   const totalVerificationsReceived = myHazards.reduce(
@@ -216,6 +216,15 @@ export default function ProfilePage() {
                 <SkeletonRow />
                 <SkeletonRow />
               </>
+            ) : isError ? (
+              <div className="py-8 text-center">
+                <p className="text-road-danger text-sm font-medium mb-1">
+                  Failed to load your reports
+                </p>
+                <p className="text-road-muted text-xs">
+                  Make sure the backend server is running, then refresh the page.
+                </p>
+              </div>
             ) : myHazards.length === 0 ? (
               <div className="py-10 text-center">
                 <span className="text-4xl block mb-3">📍</span>
