@@ -55,3 +55,14 @@ export async function verifyHazard(hazardId: string): Promise<Hazard> {
   )
   return res.data.data!.hazard
 }
+
+// ── getMyHazards ──────────────────────────────────────────────────────
+// GET /api/hazards/mine
+// Returns all hazards reported by the logged-in user, newest first.
+// Used by the profile page for history and derived stats.
+export async function getMyHazards(): Promise<Hazard[]> {
+  const res = await api.get<ApiResponse<{ hazards: Hazard[]; count: number }>>(
+    '/hazards/mine'
+  )
+  return res.data.data?.hazards ?? []
+}

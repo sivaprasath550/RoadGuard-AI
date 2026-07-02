@@ -136,4 +136,13 @@ export const hazardService = {
   async getById(hazardId: string): Promise<IHazard | null> {
     return Hazard.findById(hazardId).populate('reportedBy', 'name avatar')
   },
+
+  // Returns all hazards reported by a specific user, newest first.
+  // Used by GET /api/hazards/mine (profile page stats + list).
+  async getByUser(userId: string): Promise<IHazard[]> {
+    const hazards = await Hazard.find({ reportedBy: userId })
+      .sort({ createdAt: -1 })
+      .lean()
+    return hazards as unknown as IHazard[]
+  },
 }

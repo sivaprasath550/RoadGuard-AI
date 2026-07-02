@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { io } from 'socket.io-client'
 import ngeohash from 'ngeohash'
-import { getNearbyHazards, createHazard, verifyHazard } from '../services/hazardApi'
+import { getNearbyHazards, createHazard, verifyHazard, getMyHazards } from '../services/hazardApi'
 import type { Hazard, CreateHazardInput } from '../types'
 
 // ── Query key factory ─────────────────────────────────────────────────
@@ -11,6 +11,7 @@ import type { Hazard, CreateHazardInput } from '../types'
 // React Query caches each coordinate's result separately.
 const hazardKeys = {
   nearby: (lat: number, lng: number) => ['hazards', 'nearby', lat, lng] as const,
+  mine:   ()                          => ['hazards', 'mine'] as const,
 }
 
 // ── useNearbyHazards ──────────────────────────────────────────────────
@@ -40,12 +41,23 @@ export function useCreateHazard(latitude: number, longitude: number) {
   return useMutation({
     mutationFn: (input: CreateHazardInput) => createHazard(input),
     onSuccess: () => {
-      // Force React Query to re-fetch the nearby hazards list.
-      // The new hazard will appear in the response and a new pin renders.
-      queryClient.invalidateQueries({
-        queryKey: hazardKeys.nearby(latitude, longitude),
-      })
+      // Invalidate both the nearby feed AND the user's own history so the
+      // profile page reflects the new report without a manual refresh.
+      queryClient.invalidateQueries({ queryKey: hazardKeys.nearby(latitude, longitude) })
+      queryClient.invalidateQueries({ queryKey: hazardKeys.mine() })
     },
+  })
+}
+
+// ── useMyHazards ──────────────────────────────────────────────────────
+// Fetches all hazards reported by the current user.
+// staleTime 2 min — this data changes only when the user submits a new report,
+// which triggers an invalidation via useCreateHazard's onSuccess above.
+export function useMyHazards() {
+  return useQuery({
+    queryKey: hazardKeys.mine(),
+    queryFn:  getMyHazards,
+    staleTime: 2 * 60 * 1000,
   })
 }
 

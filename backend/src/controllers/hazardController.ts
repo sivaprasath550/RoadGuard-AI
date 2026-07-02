@@ -99,6 +99,19 @@ export const verify = asyncHandler(async (req: Request, res: Response) => {
   })
 })
 
+// ── getMine ───────────────────────────────────────────────────────────
+// GET /api/hazards/mine
+// Returns all hazards reported by the currently authenticated user.
+// Used by the profile page to show the user's history and derive stats.
+export const getMine = asyncHandler(async (req: Request, res: Response) => {
+  const hazards = await hazardService.getByUser(req.user!.userId)
+
+  res.status(200).json({
+    success: true,
+    data:    { hazards, count: hazards.length },
+  })
+})
+
 // ── resolve ───────────────────────────────────────────────────────────
 // PATCH /api/hazards/:id/resolve
 // Moderators and admins mark a hazard as fixed (removes it from active feed).

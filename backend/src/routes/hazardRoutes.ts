@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { create, getNearby, verify, resolve } from '../controllers/hazardController'
+import { create, getNearby, getMine, verify, resolve } from '../controllers/hazardController'
 import { authenticate, authorize } from '../middleware/authenticate'
 import { uploadSingle } from '../middleware/upload'
 
@@ -11,6 +11,12 @@ const router = Router()
 // No auth required — anyone (including logged-out users) can see hazards.
 // This is intentional: hazard alerts are a public safety service.
 router.get('/nearby', getNearby)
+
+// ── Authenticated routes (static paths before parameterised :id) ──────
+
+// GET /api/hazards/mine
+// MUST be declared before /:id or Express would treat "mine" as an id param.
+router.get('/mine', authenticate, getMine)
 
 // ── Authenticated routes ──────────────────────────────────────────────
 
