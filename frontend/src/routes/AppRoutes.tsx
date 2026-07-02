@@ -1,12 +1,13 @@
 // AppRoutes.tsx — all URL-to-component mappings with auth protection.
 
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { useCurrentUser } from '../hooks/useAuth'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 const MapPage      = lazy(() => import('@/pages/MapPage'))
 const AlertsPage   = lazy(() => import('@/pages/AlertsPage'))
+const HazardsPage  = lazy(() => import('@/pages/HazardsPage'))
 const LoginPage    = lazy(() => import('@/pages/LoginPage'))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
 const ProfilePage  = lazy(() => import('@/pages/ProfilePage'))
@@ -45,6 +46,7 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="/map"     element={<MapPage />} />
           <Route path="/alerts"  element={<AlertsPage />} />
+          <Route path="/hazards" element={<HazardsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
