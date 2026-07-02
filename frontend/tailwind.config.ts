@@ -1,56 +1,55 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  // "content" tells Tailwind WHERE to scan for class names.
-  // Tailwind works by scanning your files, finding every class you used,
-  // and generating ONLY those CSS rules. This is called "tree-shaking CSS".
-  //
-  // Without this, Tailwind would output 3MB of CSS (every possible utility class).
-  // With this, the final CSS is typically under 10KB — only what you actually use.
   content: [
     './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',  // Scan all JS/TS/JSX/TSX files in src/
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
+
+  // 'class' strategy: dark mode is toggled by adding/removing
+  // the 'dark' class on <html>. We use this alongside CSS variables.
+  darkMode: 'class',
 
   theme: {
     extend: {
-      // Custom color palette for RoadGuard AI's dark premium theme.
-      // These become utility classes like: bg-road-dark, text-road-accent
+      // All road-* colors now point at CSS custom properties defined in index.css.
+      // The 'rgb(var(...) / <alpha-value>)' syntax makes opacity modifiers work:
+      //   bg-road-surface/80 → background: rgb(var(--road-surface) / 0.8)
+      // Changing the CSS variable at runtime (via .light class on <html>)
+      // instantly recolors EVERY element that uses any road-* class.
       colors: {
         road: {
-          dark:      '#0A0A0F',   // Near-black background (like Tesla UI)
-          darker:    '#050508',   // Even darker for cards
-          surface:   '#12121A',   // Card surfaces
-          border:    '#1E1E2E',   // Subtle borders
-          accent:    '#3B82F6',   // Primary blue (like Google Maps blue)
-          'accent-hover': '#2563EB',
-          warning:   '#F59E0B',   // Amber for caution hazards
-          danger:    '#EF4444',   // Red for severe hazards
-          success:   '#10B981',   // Green for resolved/safe
-          text:      '#E2E8F0',   // Primary text
-          muted:     '#64748B',   // Secondary/muted text
+          dark:           'rgb(var(--road-dark)           / <alpha-value>)',
+          darker:         'rgb(var(--road-darker)         / <alpha-value>)',
+          surface:        'rgb(var(--road-surface)        / <alpha-value>)',
+          border:         'rgb(var(--road-border)         / <alpha-value>)',
+          accent:         'rgb(var(--road-accent)         / <alpha-value>)',
+          'accent-hover': 'rgb(var(--road-accent-hover)   / <alpha-value>)',
+          warning:        'rgb(var(--road-warning)        / <alpha-value>)',
+          danger:         'rgb(var(--road-danger)         / <alpha-value>)',
+          success:        'rgb(var(--road-success)        / <alpha-value>)',
+          text:           'rgb(var(--road-text)           / <alpha-value>)',
+          muted:          'rgb(var(--road-muted)          / <alpha-value>)',
         },
       },
 
-      // Custom font for a premium feel
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Consolas', 'monospace'],
       },
 
-      // Custom animations we'll use with Framer Motion + Tailwind
       keyframes: {
         'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '0%':   { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         'pulse-ring': {
-          '0%': { transform: 'scale(0.8)', opacity: '1' },
+          '0%':   { transform: 'scale(0.8)', opacity: '1' },
           '100%': { transform: 'scale(2.5)', opacity: '0' },
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.3s ease-out',
+        'fade-in':    'fade-in 0.3s ease-out',
         'pulse-ring': 'pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite',
       },
     },

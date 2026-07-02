@@ -64,21 +64,10 @@ export default function HazardReportModal({
     }
 
     try {
-      await mutation.mutateAsync({
-        type,
-        description: description.trim(),
-        severity,
-        latitude,
-        longitude,
-        image,
-      })
+      await mutation.mutateAsync({ type, description: description.trim(), severity, latitude, longitude, image })
       handleClose()
     } catch (err: any) {
       const status = err?.response?.status ?? 0
-
-      // 4xx = something the user can fix (validation, duplicate, etc.) — show it
-      // 5xx or network = our problem, not the user's — show a generic message
-      // Never forward raw server internals (Cloudinary errors, DB messages, etc.)
       const isUserError = status >= 400 && status < 500
       setError(
         isUserError
@@ -98,11 +87,9 @@ export default function HazardReportModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[2000]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000]"
           />
 
-          {/* Centering wrapper — flex column keeps dialog perfectly centered
-              on every screen size without any breakpoint logic */}
           <div className="fixed inset-0 z-[2001] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.93, y: 12 }}
@@ -110,21 +97,21 @@ export default function HazardReportModal({
               exit={{   opacity: 0, scale: 0.93, y: 12  }}
               transition={{ type: 'spring', stiffness: 320, damping: 28 }}
               onClick={e => e.stopPropagation()}
-              className="pointer-events-auto w-full max-w-md bg-road-surface
-                         rounded-2xl shadow-2xl border border-white/10
-                         flex flex-col"
+              className="pointer-events-auto w-full max-w-md
+                         bg-road-surface border border-road-border
+                         rounded-2xl shadow-2xl flex flex-col"
               style={{ maxHeight: 'min(85vh, 620px)' }}
             >
-              {/* ── Header (never scrolls) ──────────────────────────── */}
+              {/* ── Header ─────────────────────────────────────────── */}
               <div className="flex-shrink-0 flex items-center justify-between
-                              px-5 py-4 border-b border-white/10">
+                              px-5 py-4 border-b border-road-border">
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={16} className="text-road-warning" />
-                  <h2 className="text-white font-semibold text-sm">Report Hazard</h2>
+                  <h2 className="text-road-text font-semibold text-sm">Report Hazard</h2>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-lg"
+                  className="text-road-muted hover:text-road-text transition-colors p-1 rounded-lg"
                   aria-label="Close"
                 >
                   <X size={18} />
@@ -137,8 +124,8 @@ export default function HazardReportModal({
                 className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4"
               >
                 {/* GPS row */}
-                <div className="flex items-center gap-2 text-xs text-gray-400
-                                bg-white/5 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 text-xs text-road-muted
+                                bg-road-darker/50 rounded-lg px-3 py-2">
                   <MapPin size={11} className="text-road-accent flex-shrink-0" />
                   <span>
                     {latitude !== 0
@@ -147,10 +134,10 @@ export default function HazardReportModal({
                   </span>
                 </div>
 
-                {/* Hazard type — all 5 in one row */}
+                {/* Hazard type */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">
-                    Type <span className="text-red-400">*</span>
+                  <label className="block text-xs font-medium text-road-muted mb-2">
+                    Type <span className="text-road-danger">*</span>
                   </label>
                   <div className="grid grid-cols-5 gap-1.5">
                     {(Object.entries(HAZARD_META) as [HazardType, typeof HAZARD_META[HazardType]][]).map(
@@ -163,8 +150,8 @@ export default function HazardReportModal({
                             flex flex-col items-center gap-1 py-2 rounded-xl border
                             transition-all duration-150
                             ${type === key
-                              ? 'border-road-accent bg-road-accent/10 text-white'
-                              : 'border-white/10 text-gray-400 hover:border-white/30'}
+                              ? 'border-road-accent bg-road-accent/10 text-road-text'
+                              : 'border-road-border text-road-muted hover:border-road-muted'}
                           `}
                         >
                           <span className="text-xl">{meta.emoji}</span>
@@ -177,8 +164,8 @@ export default function HazardReportModal({
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">
-                    Description <span className="text-red-400">*</span>
+                  <label className="block text-xs font-medium text-road-muted mb-2">
+                    Description <span className="text-road-danger">*</span>
                   </label>
                   <textarea
                     value={description}
@@ -186,19 +173,19 @@ export default function HazardReportModal({
                     placeholder="Describe the hazard — size, exact location, danger level…"
                     rows={2}
                     maxLength={500}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2
-                               text-sm text-white placeholder-gray-500
-                               focus:outline-none focus:border-road-accent
+                    className="w-full bg-road-darker/50 border border-road-border rounded-xl px-3 py-2
+                               text-sm text-road-text placeholder:text-road-muted
+                               focus:outline-none focus:ring-0 focus:border-road-accent
                                resize-none transition-colors"
                   />
-                  <div className="text-right text-xs text-gray-600 mt-0.5">
+                  <div className="text-right text-xs text-road-muted mt-0.5">
                     {description.length}/500
                   </div>
                 </div>
 
                 {/* Severity */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">
+                  <label className="block text-xs font-medium text-road-muted mb-2">
                     Severity
                   </label>
                   <div className="flex gap-2">
@@ -211,7 +198,7 @@ export default function HazardReportModal({
                           flex-1 py-1.5 rounded-xl text-xs font-semibold border transition-all
                           ${severity === opt.value
                             ? ''
-                            : 'border-white/10 text-gray-400 hover:border-white/30'}
+                            : 'border-road-border text-road-muted hover:border-road-muted'}
                         `}
                         style={
                           severity === opt.value
@@ -233,7 +220,7 @@ export default function HazardReportModal({
 
                 {/* Error */}
                 {error && (
-                  <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20
+                  <p className="text-road-danger text-sm bg-road-danger/10 border border-road-danger/30
                                 rounded-lg px-3 py-2">
                     {error}
                   </p>

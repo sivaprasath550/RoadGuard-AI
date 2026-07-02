@@ -26,13 +26,13 @@ import { useGeolocation } from '../../hooks/useGeolocation'
 import UserLocationMarker from './UserLocationMarker'
 import MapControls from './MapControls'
 import HazardLayer from './HazardLayer'
+import { useThemeStore } from '../../store/themeStore'
 
-// ── CartoDB Dark Matter Tile Layer ────────────────────────────────────
-// This gives us the premium dark map look (Google Maps dark mode equivalent).
-// {s} = subdomain (a, b, c, d) — Carto load-balances across subdomains
-// {z}/{x}/{y} = zoom/column/row — Leaflet fills these in for each tile
-// {r} = empty string on normal screens, "@2x" on retina/HiDPI screens
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+// CartoDB provides both a dark and light tile set at the same URL structure.
+// Switching the URL causes React-Leaflet to remove the old TileLayer and
+// mount a new one, which loads the appropriate tiles automatically.
+const DARK_TILES  = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
 
 // India's geographic center — default view before GPS kicks in
@@ -91,12 +91,10 @@ interface Props {
 }
 
 export default function MapView({ onReportClick }: Props) {
-  // mapRef: stores the Leaflet map instance outside React's render cycle.
-  // useRef() holds values that persist between renders without triggering re-renders.
-  // We use MutableRefObject so MapRefCapture can write to it.
   const mapRef = useRef<LeafletMap | null>(null)
-
   const { position, isLoading, error } = useGeolocation()
+  const isLight = useThemeStore(s => s.isLight)
+  const tileUrl = isLight ? LIGHT_TILES : DARK_TILES
 
   return (
     // Outer container fills all remaining space (parent is flex row)
@@ -116,7 +114,7 @@ export default function MapView({ onReportClick }: Props) {
       >
         {/* Dark tile layer — this is what makes the map look premium */}
         <TileLayer
-          url={TILE_URL}
+          url={tileUrl}
           attribution={TILE_ATTRIBUTION}
           // maxZoom: highest zoom level this tile provider supports (20 for CartoDB)
           maxZoom={20}

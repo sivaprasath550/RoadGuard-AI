@@ -1,41 +1,77 @@
-/*
-  Tailwind CSS works through THREE directives:
-
-  @tailwind base      → Injects Preflight (a CSS reset that normalizes browser defaults)
-                        Example: removes default margins, sets box-sizing: border-box
-  @tailwind components → Injects any component classes (defined with @layer components)
-  @tailwind utilities  → Injects all the utility classes you used (bg-blue-500, p-4, etc.)
-
-  PostCSS + the Tailwind plugin transforms these @tailwind directives
-  into real CSS at build time.
-*/
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global Base Styles ──────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────
+   THEME TOKENS — CSS Custom Properties
+
+   All road-* Tailwind colors reference these variables.
+   Toggling the `.light` class on <html> instantly recolors every element
+   that uses a road-* class — no JS needed per-component.
+
+   Values are raw RGB triplets (no rgb() wrapper) so Tailwind's
+   opacity modifiers work: bg-road-surface/80 → rgb(var(--road-surface) / 0.8)
+   ───────────────────────────────────────────────────────────────────── */
+
+/* DARK theme (default) */
+:root {
+  --road-dark:         10  10  15;   /* #0A0A0F — near-black page bg      */
+  --road-darker:       5   5   8;    /* #050508 — sidebar / deepest bg    */
+  --road-surface:      18  18  26;   /* #12121A — card / panel surfaces   */
+  --road-border:       30  30  46;   /* #1E1E2E — subtle borders          */
+  --road-text:         226 232 240;  /* #E2E8F0 — primary body text       */
+  --road-muted:        100 116 139;  /* #64748B — secondary / hint text   */
+  --road-accent:       59  130 246;  /* #3B82F6 — blue accent             */
+  --road-accent-hover: 37  99  235;  /* #2563EB                           */
+  --road-warning:      245 158 11;   /* #F59E0B — amber                   */
+  --road-danger:       239 68  68;   /* #EF4444 — red                     */
+  --road-success:      16  185 129;  /* #10B981 — green                   */
+
+  /* Leaflet popup colors — used in plain CSS below */
+  --popup-bg:          #12121A;
+  --popup-border:      #1E1E2E;
+  --popup-text:        #E2E8F0;
+
+  color-scheme: dark;
+}
+
+/* LIGHT theme — applied when <html class="light"> */
+:root.light {
+  --road-dark:         241 245 249;  /* #F1F5F9 — page background         */
+  --road-darker:       226 232 240;  /* #E2E8F0 — sidebar                 */
+  --road-surface:      255 255 255;  /* #FFFFFF — card surfaces           */
+  --road-border:       203 213 225;  /* #CBD5E1 — borders                 */
+  --road-text:         15  23  42;   /* #0F172A — dark body text          */
+  --road-muted:        71  85  105;  /* #475569 — secondary text          */
+  /* accent, warning, danger, success stay the same — they work in both */
+  --road-accent:       59  130 246;
+  --road-accent-hover: 37  99  235;
+  --road-warning:      245 158 11;
+  --road-danger:       239 68  68;
+  --road-success:      16  185 129;
+
+  --popup-bg:          #FFFFFF;
+  --popup-border:      #CBD5E1;
+  --popup-text:        #0F172A;
+
+  color-scheme: light;
+}
+
+/* ── Global Base Styles ───────────────────────────────────────────── */
 @layer base {
-  /* Set the document background to our darkest color.
-     'html' and 'body' must both be set to prevent white flash on load. */
   html, body {
     @apply bg-road-dark text-road-text;
     font-family: 'Inter', system-ui, sans-serif;
-
-    /* Prevent horizontal scrollbar on mobile */
     overflow-x: hidden;
-
-    /* Smooth scrolling for anchor links */
     scroll-behavior: smooth;
+    /* Smooth theme transition — all color changes animate over 200ms */
+    transition: background-color 200ms ease, color 200ms ease;
   }
 
-  /* Remove default outline and add our custom focus ring.
-     This matters for accessibility — keyboard users need visible focus. */
   *:focus-visible {
     @apply outline-none ring-2 ring-road-accent ring-offset-2 ring-offset-road-dark;
   }
 
-  /* Better font rendering on macOS */
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -44,27 +80,32 @@
 
 /* ── Leaflet Map Overrides ────────────────────────────────────────── */
 @layer components {
-  /* The Leaflet map container MUST have an explicit height.
-     Without this, the map renders as 0px tall and appears invisible.
-     This is the #1 most common Leaflet bug. */
   .leaflet-container {
     @apply w-full h-full bg-road-darker;
+    transition: background-color 200ms ease;
   }
 
-  /* Override Leaflet's default white popup background for dark theme */
+  /* Popup background reads from CSS variables so it follows the theme */
   .leaflet-popup-content-wrapper {
-    @apply bg-road-surface text-road-text border border-road-border rounded-xl shadow-2xl;
+    background-color: var(--popup-bg) !important;
+    border: 1px solid var(--popup-border) !important;
+    color: var(--popup-text) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
   }
 
   .leaflet-popup-tip {
-    @apply bg-road-surface;
+    background-color: var(--popup-bg) !important;
+  }
+
+  .leaflet-popup-content {
+    color: var(--popup-text) !important;
+    font-family: 'Inter', sans-serif;
+    margin: 12px 16px;
   }
 }
 
 /* ── User Location Marker ─────────────────────────────────────────── */
-/* These styles live outside @layer because Leaflet injects the HTML
-   directly into the DOM — Tailwind's JIT scanner can't see inline HTML strings. */
-
 .user-location-marker {
   position: relative;
   width: 24px;
@@ -74,7 +115,6 @@
   justify-content: center;
 }
 
-/* The solid blue dot — the actual position indicator */
 .user-location-dot {
   width: 14px;
   height: 14px;
@@ -86,7 +126,6 @@
   z-index: 2;
 }
 
-/* The pulsing ring that radiates outward — shows "I am live" */
 .user-location-pulse-ring {
   position: absolute;
   width: 24px;
@@ -102,21 +141,6 @@
   100% { transform: scale(2.2); opacity: 0; }
 }
 
-/* ── Leaflet Popup Dark Theme ────────────────────────────────────── */
-.leaflet-popup-content {
-  margin: 12px 16px;
-  font-family: 'Inter', sans-serif;
-  color: #E2E8F0;
-}
-
-.user-location-popup .leaflet-popup-content-wrapper {
-  background-color: #12121A;
-  border: 1px solid #1E1E2E;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  min-width: 160px;
-}
-
 .user-location-popup .leaflet-popup-tip-container {
   display: none;
 }
@@ -129,5 +153,10 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Smooth color transitions on all themed elements */
+  .theme-transition {
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
   }
 }

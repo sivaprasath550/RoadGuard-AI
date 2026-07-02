@@ -13,9 +13,12 @@ import {
   User,
   LogOut,
   Bell,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useLogout } from '../../hooks/useAuth'
+import { useThemeStore } from '../../store/themeStore'
 
 // NavLink items for the sidebar
 const NAV_ITEMS = [
@@ -28,6 +31,7 @@ const NAV_ITEMS = [
 export default function MapSidebar() {
   const { user } = useAuthStore()
   const logoutMutation = useLogout()
+  const { isLight, toggleTheme } = useThemeStore()
 
   return (
     // Framer Motion: sidebar slides in from the left on mount
@@ -78,6 +82,20 @@ export default function MapSidebar() {
 
       {/* User Avatar + Logout at the bottom */}
       <div className="flex flex-col items-center gap-3 w-full px-2">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="
+            flex flex-col items-center justify-center
+            w-full py-3 rounded-xl gap-1.5
+            text-road-muted hover:text-road-accent hover:bg-road-surface
+            transition-all duration-200
+          "
+          aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {isLight ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          <span className="text-[10px] tracking-wide">{isLight ? 'Dark' : 'Light'}</span>
+        </button>
         {/* User avatar — shows initial if no photo */}
         <NavLink
           to="/profile"

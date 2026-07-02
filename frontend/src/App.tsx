@@ -49,7 +49,6 @@ function App() {
     // This is what makes /map, /login, /profile work as separate "pages"
     // without ever actually reloading from the server.
     <BrowserRouter>
-
       {/* QueryClientProvider injects the queryClient into React's context.
           Any component inside can now call: useQuery(), useMutation(), etc.
           Without this wrapper, those hooks would throw an error. */}

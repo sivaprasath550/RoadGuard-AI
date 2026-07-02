@@ -1,18 +1,3 @@
-// MapControls.tsx — floating action buttons overlaid on the map.
-//
-// These buttons are NOT inside the Leaflet MapContainer.
-// They are absolutely-positioned HTML elements that float OVER the map canvas.
-// This is how Google Maps, Apple Maps, and Uber put their buttons over the map.
-//
-// STACKING CONTEXT:
-// The map (Leaflet canvas) has z-index ~400 (Leaflet's internal value).
-// Our controls have z-index 1000 — higher = appears on top.
-// We use Tailwind's z-[1000] to set this.
-//
-// We receive a "mapRef" — a reference to the Leaflet map instance.
-// This lets us imperatively call map.flyTo(), map.zoomIn() etc.
-// from button click handlers — connecting React UI to Leaflet's API.
-
 import { RefObject } from 'react'
 import { Map as LeafletMap } from 'leaflet'
 import { motion } from 'framer-motion'
@@ -20,15 +5,13 @@ import { Navigation, Plus, Minus, AlertTriangle } from 'lucide-react'
 import { GeoPosition } from '../../hooks/useGeolocation'
 
 interface Props {
-  mapRef:   RefObject<LeafletMap | null>
-  position: GeoPosition | null
-  onReportClick: () => void  // Opens hazard report modal (Phase 4)
+  mapRef:        RefObject<LeafletMap | null>
+  position:      GeoPosition | null
+  onReportClick: () => void
 }
 
-// Framer Motion: each button fades in from the right with a staggered delay.
-// staggerChildren means each child's animation starts 100ms after the previous.
 const containerVariants = {
-  hidden: {},
+  hidden:  {},
   visible: { transition: { staggerChildren: 0.08 } },
 }
 
@@ -38,33 +21,15 @@ const buttonVariants = {
 }
 
 export default function MapControls({ mapRef, position, onReportClick }: Props) {
-
   function handleLocateMe() {
     if (!mapRef.current || !position) return
-
-    // flyTo() animates a smooth zoom and pan to the target coordinates.
-    // animate: true → smooth easing animation
-    // duration: 1.5 → animation takes 1.5 seconds
-    // Compare to setView() which snaps instantly — no animation.
-    mapRef.current.flyTo(
-      [position.lat, position.lng],
-      16,  // Zoom to street level
-      { animate: true, duration: 1.5 }
-    )
+    mapRef.current.flyTo([position.lat, position.lng], 16, { animate: true, duration: 1.5 })
   }
 
-  function handleZoomIn() {
-    // zoomIn() increases zoom by 1 level with animation.
-    // Leaflet's internal animation uses requestAnimationFrame for smooth transitions.
-    mapRef.current?.zoomIn()
-  }
-
-  function handleZoomOut() {
-    mapRef.current?.zoomOut()
-  }
+  function handleZoomIn()  { mapRef.current?.zoomIn()  }
+  function handleZoomOut() { mapRef.current?.zoomOut() }
 
   return (
-    // Absolute positioned container — floats over the map in the bottom-right
     <div className="absolute bottom-8 right-4 z-[1000] flex flex-col items-end gap-3">
       <motion.div
         variants={containerVariants}
@@ -72,7 +37,7 @@ export default function MapControls({ mapRef, position, onReportClick }: Props) 
         animate="visible"
         className="flex flex-col items-end gap-2"
       >
-        {/* Report Hazard — primary CTA (Phase 4 wires this up fully) */}
+        {/* ── Report Hazard ───────────────────────────────────────── */}
         <motion.button
           variants={buttonVariants}
           onClick={onReportClick}
@@ -89,7 +54,7 @@ export default function MapControls({ mapRef, position, onReportClick }: Props) 
           Report Hazard
         </motion.button>
 
-        {/* Locate Me */}
+        {/* ── Locate Me ──────────────────────────────────────────── */}
         <motion.button
           variants={buttonVariants}
           onClick={handleLocateMe}
@@ -108,7 +73,7 @@ export default function MapControls({ mapRef, position, onReportClick }: Props) 
           <Navigation className="w-5 h-5" />
         </motion.button>
 
-        {/* Zoom controls — grouped together */}
+        {/* ── Zoom controls ───────────────────────────────────────── */}
         <motion.div
           variants={buttonVariants}
           className="flex flex-col rounded-2xl overflow-hidden border border-road-border shadow-lg"
